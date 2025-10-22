@@ -14,24 +14,22 @@ from tqdm import tqdm
 
 # CONFIGURATION
 OUTPUT_FILE = "data/scraped_data.csv"
-SEARCH_QUERY = "trending music"   # Change to "gaming", "education", etc.
-MAX_RESULTS = 3000                # Adjust as needed
-SCROLL_PAUSE = 2                  # Seconds to wait while scrolling
+SEARCH_QUERY = "trending music"   # Change as needed
+MAX_RESULTS = 3000
+SCROLL_PAUSE = 2
 
-# SELENIUM SETUP
+# --- SELENIUM SETUP ---
 def setup_driver():
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
-
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     return driver
 
-# UTILITY FUNCTIONS
+# --- UTILITIES ---
 def parse_views(views_text):
-    """Convert text like '2.3M views' → integer."""
     if not views_text:
         return 0
     views_text = views_text.lower().replace("views", "").strip()
@@ -47,9 +45,7 @@ def parse_views(views_text):
     except:
         return 0
 
-
 def parse_duration(duration_text):
-    """Convert duration string (e.g. '12:34') → minutes."""
     try:
         parts = duration_text.strip().split(":")
         if len(parts) == 2:
@@ -61,20 +57,64 @@ def parse_duration(duration_text):
     except:
         return 0
 
-# SCRAPE FUNCTION
+# --- SCRAPER ---
 def scrape_youtube(search_query, max_results=1000):
     driver = setup_driver()
-
-    # Perform search
     search_url = f"https://www.youtube.com/results?search_query={search_query.replace(' ', '+')}"
     driver.get(search_url)
     time.sleep(3)
 
-    # Scroll to load videos
-    last_height = driver.execute_script("return document.documentElement.scrollHeight")
-    video_count = 0
-    scroll_attempts = 0
+    collected = []
+    scrolls = 0
 
-    while video_count < max_results and scroll_attempts < 30:
+    print(f"Collecting up to {max_results} results for '{search_query}'...\n")
+
+    while len(collected) < max_results and scrolls < 30:
+        scrolls += 1
         driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
-        time
+        time.sleep(SCROLL_PAUSE)
+
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        videos = soup.select("ytd-video-renderer")
+
+        for v in videos:
+            title_elem = v.select_one("#video-title")
+            channel_elem = v.select_one("#text > a")
+            meta = v.select_one("#metadata-line")
+
+            title = title_elem.get("title") if title_elem else None
+            link = title_elem.get("href") if title_elem else None
+            video_id = link.split("v=")[-1] if link and "v=" in link else None
+            channel_title = channel_elem.text.strip() if channel_elem else None
+            views_text = meta.find_all("span")[0].text if meta and len(meta.find_all("span")) > 0 else "0"
+            publish_date = meta.find_all("span")[1].text if meta and len(meta.find_all("span")) > 1 else None
+
+            if not video_id or any(d["video_id"] == video_id for d in collected):
+                continue
+
+            collected.append({
+                "video_id": video_id,
+                "title": title,
+                "channel_title": channel_title,
+                "publish_date": publish_date,
+                "category_id": None,
+                "tags": None,
+                "duration": None,
+                "viewCount": parse_views(views_text),
+                "likeCount": None,
+                "commentCount": None
+            })
+
+        print(f"Collected {len(collected)} videos so far...")
+        if len(collected) >= max_results:
+            break
+
+    driver.quit()
+
+    os.makedirs("data", exist_ok=True)
+    pd.DataFrame(collected).to_csv(OUTPUT_FILE, index=False)
+    print(f"\nDone! Saved {len(collected)} videos to {OUTPUT_FILE}")
+
+# --- MAIN ---
+if __name__ == "__main__":
+    scrape_youtube(SEARCH_QUERY, MAX_RESULTS)
