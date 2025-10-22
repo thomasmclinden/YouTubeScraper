@@ -3,7 +3,7 @@ import numpy as np
 import os
 from datetime import datetime, timezone
 
-# --- File paths ---
+# File paths
 DATA_DIR = "data"
 API_INPUT = os.path.join(DATA_DIR, "api_data.csv")
 SCRAPED_INPUT = os.path.join(DATA_DIR, "scraped_data.csv")
@@ -11,7 +11,7 @@ API_OUTPUT = os.path.join(DATA_DIR, "api_processed.csv")
 SCRAPED_OUTPUT = os.path.join(DATA_DIR, "scraped_processed.csv")
 
 
-# --- Helper functions ---
+# Helper functions
 def safe_fill_numeric(df):
     num_cols = df.select_dtypes(include=[np.number]).columns
     df[num_cols] = df[num_cols].fillna(0)
@@ -20,7 +20,7 @@ def safe_fill_numeric(df):
 
 
 def parse_duration(duration):
-    """Convert ISO 8601 duration like PT5M33S to minutes."""
+# Convert ISO 8601 duration like PT5M33S to minutes.
     try:
         duration = duration.replace("PT", "")
         hours, minutes, seconds = 0, 0, 0
@@ -75,7 +75,7 @@ def add_common_features(df, source="api"):
     return df
 
 
-# --- Preprocessing functions ---
+# Preprocessing functions
 def preprocess_api():
     df = pd.read_csv(API_INPUT)
     print(f"Loaded API data with {len(df)} rows and {len(df.columns)} columns.")
@@ -96,11 +96,11 @@ def preprocess_scraped():
     return df
 
 
-# --- Main execution ---
+# Main execution
 def main():
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    # --- Process API Data ---
+    # Process API Data
     if os.path.exists(API_INPUT):
         print("Loading API data...")
         df_api = preprocess_api()
@@ -109,7 +109,7 @@ def main():
         print(f"Error: {API_INPUT} not found.")
         return
 
-    # --- Try to process scraped data only if present ---
+    # Try to process scraped data only if present
     if os.path.exists(SCRAPED_INPUT):
         print("Loading scraped data...")
         df_scraped = preprocess_scraped()
@@ -118,7 +118,7 @@ def main():
         print("No scraped data found. Skipping scraped preprocessing.")
         df_scraped = None
 
-    # --- Summary ---
+    # Summary
     print("\nSummary:")
     print(f"API processed shape: {df_api.shape}")
     if df_scraped is not None:

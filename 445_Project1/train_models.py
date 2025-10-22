@@ -21,7 +21,7 @@ os.makedirs("figures", exist_ok=True)
 
 # HELPER FUNCTIONS
 def evaluate_model(model, X_train, X_test, y_train, y_test, label):
-    """Evaluate model and print metrics."""
+    #Evaluate model and print metrics.
     train_pred = model.predict(X_train)
     test_pred = model.predict(X_test)
 
@@ -38,7 +38,7 @@ def evaluate_model(model, X_train, X_test, y_train, y_test, label):
 
 
 def plot_feature_importance(model, feature_names, title, filename):
-    """Plot feature importance bar chart."""
+    # Plot feature importance bar chart.
     if hasattr(model, "feature_importances_"):
         importances = model.feature_importances_
         indices = np.argsort(importances)[::-1]
@@ -71,7 +71,7 @@ def train_on_dataset(csv_path, label):
     plot_feature_importance(rf, X.columns, f"{label} RandomForest Feature Importance", f"{label.lower()}_rf_importance.png")
     joblib.dump(rf, os.path.join(MODEL_DIR, f"{label.lower()}_rf.pkl"))
 
-    # --- XGBoost ---
+    # XGBoost
     xgb = XGBRegressor(
         n_estimators=400,
         learning_rate=0.05,

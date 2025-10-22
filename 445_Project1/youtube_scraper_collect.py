@@ -18,7 +18,7 @@ SEARCH_QUERY = "trending music"   # Change as needed
 MAX_RESULTS = 3000
 SCROLL_PAUSE = 2
 
-# --- SELENIUM SETUP ---
+# SELENIUM SETUP
 def setup_driver():
     options = Options()
     options.add_argument("--headless")
@@ -28,7 +28,7 @@ def setup_driver():
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     return driver
 
-# --- UTILITIES ---
+# UTILITIES
 def parse_views(views_text):
     if not views_text:
         return 0
@@ -57,7 +57,7 @@ def parse_duration(duration_text):
     except:
         return 0
 
-# --- SCRAPER ---
+# SCRAPER
 def scrape_youtube(search_query, max_results=1000):
     driver = setup_driver()
     search_url = f"https://www.youtube.com/results?search_query={search_query.replace(' ', '+')}"
@@ -115,6 +115,6 @@ def scrape_youtube(search_query, max_results=1000):
     pd.DataFrame(collected).to_csv(OUTPUT_FILE, index=False)
     print(f"\nDone! Saved {len(collected)} videos to {OUTPUT_FILE}")
 
-# --- MAIN ---
+# MAIN
 if __name__ == "__main__":
     scrape_youtube(SEARCH_QUERY, MAX_RESULTS)

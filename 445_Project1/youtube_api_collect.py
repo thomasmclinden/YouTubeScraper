@@ -4,7 +4,7 @@ import time
 from googleapiclient.discovery import build
 
 # CONFIGURATION
-API_KEY = "AIzaSyDeR6QTIIVZ35CvzicgpGTBLnhsX-KIvAA"  # <-- replace with your API key
+API_KEY = "AIzaSyDeR6QTIIVZ35CvzicgpGTBLnhsX-KIvAA"  # replace with your API key
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 OUTPUT_FILE = os.path.join(DATA_DIR, "api_data.csv")
