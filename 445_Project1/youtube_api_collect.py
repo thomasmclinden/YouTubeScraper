@@ -40,7 +40,7 @@ def collect_videos(target_count=3000):
         if len(collected_videos) >= target_count:
             break
 
-        print(f"🔍 Collecting videos for query: '{query}'")
+        print(f"Collecting videos for query: '{query}'")
         next_page_token = None
 
         while len(collected_videos) < target_count:
@@ -113,7 +113,7 @@ def collect_videos(target_count=3000):
 
 # MAIN
 if __name__ == "__main__":
-    print(f"🚀 Collecting up to {TARGET_COUNT} videos across multiple queries...")
+    print(f"Collecting up to {TARGET_COUNT} videos across multiple queries...")
     all_videos = collect_videos(TARGET_COUNT)
     save_csv(all_videos, OUTPUT_FILE)
     print(f"Collected {len(all_videos)} videos and saved to {OUTPUT_FILE}")
